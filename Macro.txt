@@ -1,0 +1,155 @@
+--------------------------------------------------------------------------------------
+g++ -o fileanme filename.cpp
+./filename
+
+or 
+
+g++ fileanme filename.cpp
+./a.out
+---------------------------------------------------------------------------------------
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <cctype>
+
+// Enum for token types
+enum TokenType {
+    ASSEMBLY_DIRECTIVE,
+    LABEL,
+    REGISTER,
+    PARAMETER,
+    OPERATOR,
+    INTEGER,
+    STRING,
+    UNKNOWN
+};
+
+// Function to determine token type
+TokenType getTokenType(const std::string& token) {
+    // Assembly directives
+    if (token[0] == '.') {
+        return ASSEMBLY_DIRECTIVE;
+    }
+
+    // Labels
+    if (token.back() == ':') {
+        return LABEL;
+    }
+
+    // Registers
+    if (token.size() > 1 && token[0] == 'R' && std::isdigit(token[1])) {
+        return REGISTER;
+    }
+
+    // Register names (e.g., eax, ebx)
+    if (token.size() > 1 && std::isalpha(token[0]) && std::isalnum(token[1])) {
+        return REGISTER;
+    }
+
+    // Parameters
+    if (token[0] == '%' && std::isdigit(token[1])) {
+        return PARAMETER;
+    }
+
+    // Operators
+    if (std::ispunct(token[0])) {
+        return OPERATOR;
+    }
+
+    // Integers
+    bool isInteger = true;
+    for (char c : token) {
+        if (!std::isdigit(c)) {
+            isInteger = false;
+            break;
+        }
+    }
+    if (isInteger) {
+        return INTEGER;
+    }
+
+    // Strings
+    if (token.size() > 1 && token[0] == '"' && token.back() == '"') {
+        return STRING;
+    }
+
+    return UNKNOWN;
+}
+
+int main() {
+    std::string macroCode;
+    std::cout << "Enter macro code: ";
+    std::getline(std::cin, macroCode);
+
+    std::string token;
+    for (char c : macroCode) {
+        if (c == ' ' || c == '\t') {
+            if (!token.empty()) {
+                TokenType tokenType = getTokenType(token);
+                switch (tokenType) {
+                    case ASSEMBLY_DIRECTIVE:
+                        std::cout << "Assembly Directive: " << token << std::endl;
+                        break;
+                    case LABEL:
+                        std::cout << "Label: " << token << std::endl;
+                        break;
+                    case REGISTER:
+                        std::cout << "Register: " << token << std::endl;
+                        break;
+                    case PARAMETER:
+                        std::cout << "Parameter: " << token << std::endl;
+                        break;
+                    case OPERATOR:
+                        std::cout << "Operator: " << token << std::endl;
+                        break;
+                    case INTEGER:
+                        std::cout << "Integer: " << token << std::endl;
+                        break;
+                    case STRING:
+                        std::cout << "String: " << token << std::endl;
+                        break;
+                    default:
+                        std::cout << "Unknown: " << token << std::endl;
+                        break;
+                }
+                token.clear();
+            }
+        } else {
+            token += c;
+        }
+    }
+
+    // Process the last token
+    if (!token.empty()) {
+        TokenType tokenType = getTokenType(token);
+        switch (tokenType) {
+            case ASSEMBLY_DIRECTIVE:
+                std::cout << "Assembly Directive: " << token << std::endl;
+                break;
+            case LABEL:
+                std::cout << "Label: " << token << std::endl;
+                break;
+            case REGISTER:
+                std::cout << "Register: " << token << std::endl;
+                break;
+            case PARAMETER:
+                std::cout << "Parameter: " << token << std::endl;
+                break;
+            case OPERATOR:
+                std::cout << "Operator: " << token << std::endl;
+                break;
+            case INTEGER:
+                std::cout << "Integer: " << token << std::endl;
+                break;
+            case STRING:
+                std::cout << "String: " << token << std::endl;
+                break;
+            default:
+                std::cout << "Unknown: " << token << std::endl;
+                break;
+        }
+    }
+
+    return 0;
+}

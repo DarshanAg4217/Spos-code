@@ -1,0 +1,68 @@
+--------------------------------------------------------------------------------------
+g++ -o fileanme filename.cpp
+./filename
+
+or 
+
+g++ fileanme filename.cpp
+./a.out
+---------------------------------------------------------------------------------------
+
+#include <iostream>
+using namespace std;
+
+int data = 0;
+int readers = 0;
+
+void reader() {
+    int data = 0;
+    int readers = 0;
+    readers++;
+    cout << "Reader is reading " << endl;
+    cout << "Reader has finished reading " <<endl;
+    readers--;
+}
+
+void readermul() {
+    int data = 0;
+    int readers = 0;
+    readers++;
+    cout << "Reader is reading " << endl;
+    cout << "Reader is reading " << endl;
+    cout << "Reader is reading " << endl;
+    cout << "Reader has finished reading " <<endl;
+    cout << "Reader has finished reading " <<endl;
+    cout << "Reader has finished reading " <<endl;
+    readers--;
+}
+
+void writer() {
+    int data = 0;
+    int readers = 0;
+    data++;
+    cout << "Writer is writing "  << endl;
+    cout << "Writer has finished writing " << endl;
+   
+}
+
+
+int main() {
+    int n;
+    cout<<"\n----------Reader Writer Problem-----------\n";
+    cout<<"Enter the number of times of execution: ";
+    cin>>n;
+    for (int i = 0; i < n; i++) {
+        reader();
+        writer();
+        writer();
+        readermul();
+        writer();
+        writer();
+        reader();
+        writer();
+        readermul();
+        
+    }
+    return 0;
+}
+

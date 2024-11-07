@@ -1,0 +1,160 @@
+--------------------------------------------------------------------------------------
+g++ -o fileanme filename.cpp
+./filename
+
+or 
+
+g++ fileanme filename.cpp
+./a.out
+---------------------------------------------------------------------------------------
+
+#include <iostream>
+#include <climits>
+using namespace std;
+
+struct Process {
+    int pid;
+    int arrivalTime;
+    int remainingBurstTime;
+    int burstTime;
+    int waitingTime;
+    int turnaroundTime;
+};
+
+void fcfs(Process processes[], int n) {
+    int currentTime = 0;
+    cout << "FCFS Scheduling:\n";
+    for (int i = 0; i < n; i++) {
+        if (currentTime < processes[i].arrivalTime) {
+            currentTime = processes[i].arrivalTime;
+        }
+        processes[i].waitingTime = currentTime - processes[i].arrivalTime;
+        processes[i].turnaroundTime = processes[i].waitingTime + processes[i].burstTime;
+        cout << "Process " << processes[i].pid << ": " << currentTime << " - " << currentTime + processes[i].burstTime << endl;
+        currentTime += processes[i].burstTime;
+    }
+    cout << "\nProcess\tArrival Time\tBurst Time\tWaiting Time\tTurnaround Time\n";
+    for (int i = 0; i < n; i++) {
+        cout << processes[i].pid << "\t" << processes[i].arrivalTime << "\t\t" << processes[i].burstTime << "\t\t" << processes[i].waitingTime << "\t\t" << processes[i].turnaroundTime << "\n";
+    }
+}
+
+void roundRobin(Process processes[], int n, int quantum) {
+    int currentTime = 0;
+    bool completed[n] = {false};
+    cout << "Round Robin Scheduling (Quantum = " << quantum << "):\n";
+    for (int i = 0; i < n; i++) {
+        processes[i].remainingBurstTime = processes[i].burstTime;
+    }
+    while (true) {
+        bool allCompleted = true;
+        for (int i = 0; i < n; i++) {
+            if (!completed[i]) {
+                allCompleted = false;
+                if (processes[i].arrivalTime <= currentTime) {
+                    int executedTime = min(quantum, processes[i].remainingBurstTime);
+                    cout << "Process " << processes[i].pid << ": " << currentTime << " - " << currentTime + executedTime << endl;
+                    currentTime += executedTime;
+                    processes[i].remainingBurstTime -= executedTime;
+                    if (processes[i].remainingBurstTime == 0) {
+                        processes[i].turnaroundTime = currentTime - processes[i].arrivalTime;
+                        processes[i].waitingTime = processes[i].turnaroundTime - processes[i].burstTime;
+                        completed[i] = true;
+                    }
+                }
+            }
+        }
+        if (allCompleted) {
+            break;
+        }
+        currentTime++;
+    }
+    cout << "\nProcess\tArrival Time\tBurst Time\tWaiting Time\tTurnaround Time\n";
+    for (int i = 0; i < n; i++) {
+        cout << processes[i].pid << "\t" << processes[i].arrivalTime << "\t\t" << processes[i].burstTime << "\t\t" << processes[i].waitingTime << "\t\t" << processes[i].turnaroundTime << "\n";
+    }
+}
+
+void sjf(Process processes[], int n) {
+    int currentTime = 0;
+    bool completed[n] = {false};
+    cout << "SJF Scheduling:\n";
+    while (true) {
+        int minBurst = INT_MAX;
+        int minIndex = -1;
+        for (int i = 0; i < n; i++) {
+            if (!completed[i] && processes[i].arrivalTime <= currentTime && processes[i].burstTime < minBurst) {
+                minBurst = processes[i].burstTime;
+                minIndex = i;
+            }
+        }
+        if (minIndex == -1) {
+            currentTime++;
+            continue;
+        }
+        cout << "Process " << processes[minIndex].pid << ": " << currentTime << " - " << currentTime + processes[minIndex].burstTime << endl;
+        currentTime += processes[minIndex].burstTime;
+        processes[minIndex].turnaroundTime = currentTime - processes[minIndex].arrivalTime;
+        processes[minIndex].waitingTime = processes[minIndex].turnaroundTime - processes[minIndex].burstTime;
+        completed[minIndex] = true;
+        bool allCompleted = true;
+        for (bool completedProcess : completed) {
+            if (!completedProcess) {
+                allCompleted = false;
+                break;
+            }
+        }
+        if (allCompleted) {
+            break;
+        }
+    }
+    cout << "\nProcess\tArrival Time\tBurst Time\tWaiting Time\tTurnaround Time\n";
+    for (int i = 0; i < n; i++) {
+        cout << processes[i].pid << "\t" << processes[i].arrivalTime << "\t\t" << processes[i].burstTime << "\t\t" << processes[i].waitingTime << "\t\t" << processes[i].turnaroundTime << "\n";
+    }
+}
+
+int main() {
+    int n;
+    cout << "Enter number of processes: ";
+    cin >> n;
+
+    Process processes[n];
+    for (int i = 0; i < n; i++) {
+        cout << "Enter process " << i + 1 << " details:\n";
+        cout << "PID: ";
+        cin >> processes[i].pid;
+        cout << "Arrival Time: ";
+        cin >> processes[i].arrivalTime;
+        cout << "Burst Time: ";
+        cin >> processes[i].burstTime;
+    }
+
+    int choice;
+    cout << "CPU Scheduling Algorithms:\n";
+    cout << "1. FCFS\n";
+    cout << "2. Round Robin\n";
+    cout << "3. SJF\n";
+    cout << "Enter your choice: ";
+    cin >> choice;
+
+    switch (choice) {
+        case 1:
+            fcfs(processes, n);
+            break;
+        case 2: {
+            int quantum;
+            cout << "Enter time quantum: ";
+            cin >> quantum;
+            roundRobin(processes, n, quantum);
+            break;
+        }
+        case 3:
+            sjf(processes, n);
+            break;
+        default:
+            cout << "Invalid choice.\n";
+    }
+
+    return 0;
+}

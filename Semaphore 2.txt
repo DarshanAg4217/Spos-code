@@ -1,0 +1,65 @@
+--------------------------------------------------------------------------------------
+g++ -o fileanme filename.cpp
+./filename
+
+or 
+
+g++ fileanme filename.cpp
+./a.out
+---------------------------------------------------------------------------------------
+
+#include <iostream>
+#include <chrono>
+#include <unistd.h>
+
+int readers = 0;
+bool writing = false;
+
+void reader(int id) {
+    while (writing) {
+        // Wait
+    }
+    readers++;
+    std::cout << "Reader " << id << " started reading." << std::endl;
+    sleep(1);
+    std::cout << "Reader " << id << " finished reading." << std::endl;
+    readers--;
+    if (readers == 0) {
+        // Notify writer
+    }
+}
+
+void writer(int id) {
+    while (readers > 0 || writing) {
+        // Wait
+    }
+    writing = true;
+    std::cout << "Writer " << id << " started writing." << std::endl;
+    sleep(2);
+    std::cout << "Writer " << id << " finished writing." << std::endl;
+    writing = false;
+    // Notify readers
+}
+
+int main() {
+    fork();
+    if (fork() == 0) {
+        reader(1);
+    } else {
+        fork();
+        if (fork() == 0) {
+            writer(1);
+        } else {
+            fork();
+            if (fork() == 0) {
+                reader(2);
+            } else {
+                // Wait for child processes to finish
+                sleep(5);
+            }
+        }
+    }
+
+    return 0;
+}
+

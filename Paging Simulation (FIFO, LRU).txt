@@ -1,0 +1,185 @@
+--------------------------------------------------------------------------------------
+g++ -o fileanme filename.cpp
+./filename
+
+or 
+
+g++ fileanme filename.cpp
+./a.out
+---------------------------------------------------------------------------------------
+
+#include <iostream>
+using namespace std;
+
+const int MAX_PAGES = 100;
+
+void fifo(int pages[], int n, int frameSize) {
+    int frames[frameSize] = {-1};
+    int pageFaults = 0;
+
+    for (int i = 0; i < n; i++) {
+        bool found = false;
+        for (int j = 0; j < frameSize; j++) {
+            if (frames[j] == pages[i]) {
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            pageFaults++;
+            for (int j = 0; j < frameSize - 1; j++) {
+                frames[j] = frames[j + 1];
+            }
+            frames[frameSize - 1] = pages[i];
+        }
+
+        cout << "Page Reference: " << pages[i] << endl;
+        cout << "Frames: ";
+        for (int j = 0; j < frameSize; j++) {
+            cout << frames[j] << " ";
+        }
+        cout << endl;
+    }
+
+    cout << "Page Faults (FIFO): " << pageFaults << endl;
+}
+
+void lru(int pages[], int n, int frameSize) {
+    int frames[frameSize] = {-1};
+    int pageFaults = 0;
+    int time[frameSize] = {0};
+
+    for (int i = 0; i < n; i++) {
+        bool found = false;
+        int index = -1;
+
+        for (int j = 0; j < frameSize; j++) {
+            if (frames[j] == pages[i]) {
+                found = true;
+                index = j;
+                break;
+            }
+        }
+
+        if (found) {
+            time[index] = i;
+        } 
+        else {
+            pageFaults++;
+
+            int lruIndex = 0;
+            int lruTime = time[0];
+            for (int j = 1; j < frameSize; j++) {
+                if (time[j] < lruTime) {
+                    lruTime = time[j];
+                    lruIndex = j;
+                }
+            }
+
+            frames[lruIndex] = pages[i];
+            time[lruIndex] = i;
+        }
+
+        cout << "Page Reference: " << pages[i] << endl;
+        cout << "Frames: ";
+        for (int j = 0; j < frameSize; j++) {
+            cout << frames[j] << " ";
+        }
+        cout << endl;
+    }
+
+    cout << "Page Faults (LRU): " << pageFaults << endl;
+}
+
+void optimal(int pages[], int n, int frameSize) {
+    int frames[frameSize] = {-1};
+    int pageFaults = 0;
+
+    for (int i = 0; i < n; i++) {
+        bool found = false;
+
+        for (int j = 0; j < frameSize; j++) {
+            if (frames[j] == pages[i]) {
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            pageFaults++;
+
+            int maxDistance = 0;
+            int victimIndex = 0;
+            for (int j = 0; j < frameSize; j++) {
+                int distance = 0;
+                for (int k = i + 1; k < n; k++) {
+                    if (pages[k] == frames[j]) {
+                        distance = k - i;
+                        break;
+                    }
+                }
+                if (distance > maxDistance) {
+                    maxDistance = distance;
+                    victimIndex = j;
+                } else if (distance == 0) { 
+                    victimIndex = j;
+                    break;
+                }
+            }
+
+            frames[victimIndex] = pages[i];
+        }
+
+        cout << "Page Reference: " << pages[i] << endl;
+        cout << "Frames: ";
+        for (int j = 0; j < frameSize; j++) {
+            cout << frames[j] << " ";
+        }
+        cout << endl;
+    }
+
+    cout << "Page Faults (Optimal): " << pageFaults << endl;
+}
+
+int main() {
+    int n, frameSize, choice;
+
+    cout << "Enter number of pages: ";
+    cin >> n;
+
+    int pages[MAX_PAGES];
+    cout << "Enter page reference string:\n";
+    for (int i = 0; i < n; i++) {
+        cin >> pages[i];
+    }
+
+    cout << "Enter frame size: ";
+    cin >> frameSize;
+
+    cout << "\nPaging Algorithms:\n";
+    cout << "1. FIFO\n";
+    cout << "2. LRU\n";
+    cout << "3. Optimal Method\n\n";
+    cout << "Enter your choice: ";
+    cin >> choice;
+
+    switch (choice) {
+        case 1:
+            cout << "\nFIFO Paging Simulation:\n";
+            fifo(pages, n, frameSize);
+            break;
+        case 2:
+            cout << "L\nRU Paging Simulation:\n";
+            lru(pages, n, frameSize);
+            break;
+          case 3:
+            cout << "\nOptimal Paging Simulation:\n";
+            optimal(pages, n, frameSize);
+            break;
+        default:
+            cout << "Invalid choice.\n";
+    }
+
+    return 0;
+}
